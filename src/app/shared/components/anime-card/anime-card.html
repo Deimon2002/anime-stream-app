@@ -1,0 +1,44 @@
+<article class="anime-card">
+  <a [routerLink]="['/anime', anime().id]" class="poster-link">
+    <img [src]="anime().posterUrl" [alt]="anime().title" loading="lazy" />
+    <div class="poster-overlay">
+      <span class="rating-pill">★ {{ anime().rating.toFixed(1) }}</span>
+      <span class="ep-pill">{{ anime().episodes.length }} eps</span>
+    </div>
+    <button
+      type="button"
+      class="watchlist-fab"
+      [class.saved]="inWatchlist()"
+      (click)="toggleWatchlist($event)"
+      [title]="inWatchlist() ? 'Quitar de Mi Lista' : 'Guardar en Mi Lista'"
+      [attr.aria-label]="inWatchlist() ? 'Quitar de Mi Lista' : 'Guardar en Mi Lista'"
+    >
+      {{ inWatchlist() ? '✓' : '+' }}
+    </button>
+  </a>
+
+  <div class="card-body">
+    <div class="card-meta">
+      <span>{{ anime().year }}</span>
+      <span>•</span>
+      <span>{{ anime().studio }}</span>
+    </div>
+    <h3 class="card-title">
+      <a [routerLink]="['/anime', anime().id]">{{ anime().title }}</a>
+    </h3>
+    <div class="card-genres">
+      @for (genre of anime().genres.slice(0, 2); track genre) {
+        <span class="genre-tag">{{ genre }}</span>
+      }
+      @if (firstEpisodeId()) {
+        <a
+          [routerLink]="['/watch', anime().id, firstEpisodeId()]"
+          class="play-mini"
+          title="Ver Episodio 1"
+        >
+          ▶ Ver
+        </a>
+      }
+    </div>
+  </div>
+</article>

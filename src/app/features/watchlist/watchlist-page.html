@@ -1,0 +1,59 @@
+<div class="page-shell">
+  <section class="block-first">
+    <div class="section-header">
+      <div>
+        <h1 class="page-title">Mi Lista de Anime</h1>
+        <p class="muted">Sincronizada automáticamente con localStorage mediante effect().</p>
+      </div>
+      <a class="btn btn-ghost" routerLink="/">Explorar catálogo</a>
+    </div>
+
+    @if (watchlist().length > 0) {
+      <div class="anime-grid">
+        @for (anime of watchlist(); track anime.id) {
+          <app-anime-card [anime]="anime" />
+        }
+      </div>
+    } @else {
+      <div class="empty-box">
+        <h3>Tu lista está vacía</h3>
+        <p class="muted">Pulsa "+" en cualquier anime del catálogo para guardarlo aquí.</p>
+        <a class="btn btn-primary" routerLink="/">Descubrir series</a>
+      </div>
+    }
+  </section>
+
+  <section class="history-section">
+    <div class="section-header">
+      <h2 class="section-title">Historial de reproducción</h2>
+      @if (continueWatching().length > 0) {
+        <button type="button" class="btn btn-ghost" (click)="clearHistory()">
+          Limpiar historial
+        </button>
+      }
+    </div>
+
+    @if (continueWatching().length > 0) {
+      <div class="history-list">
+        @for (item of continueWatching(); track item.episode.id) {
+          <a
+            class="history-row"
+            [routerLink]="['/watch', item.anime.id, item.episode.id]"
+          >
+            <div>
+              <strong>{{ item.anime.title }}</strong>
+              <p class="muted">
+                Episodio {{ item.episode.number }}: {{ item.episode.title }}
+              </p>
+            </div>
+            <span class="badge" [class.badge-live]="item.progress.completed">
+              {{ item.progress.completed ? 'Completado' : item.percent + '% visto' }}
+            </span>
+          </a>
+        }
+      </div>
+    } @else {
+      <p class="muted">Aún no has reproducido ningún episodio.</p>
+    }
+  </section>
+</div>

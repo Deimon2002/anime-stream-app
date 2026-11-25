@@ -1,0 +1,12 @@
+<app-navbar
+  [inspectorOpen]="inspectorOpen()"
+  (toggleInspector)="toggleInspector()"
+/>
+
+<main class="app-main">
+  <router-outlet />
+</main>
+
+@if (inspectorOpen()) {
+  <app-signals-inspector (closePanel)="toggleInspector()" />
+}

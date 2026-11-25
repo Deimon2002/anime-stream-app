@@ -1,0 +1,49 @@
+.page-title {
+  margin: 0;
+  font-size: 1.7rem;
+}
+
+.anime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 18px;
+}
+
+.empty-box {
+  text-align: center;
+  padding: 48px 20px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-subtle);
+}
+
+.history-section {
+  margin-top: 40px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  transition: border-color 0.2s ease;
+}
+
+.history-row:hover {
+  border-color: var(--accent-cyan);
+}
+
+.history-row p {
+  margin: 2px 0 0;
+  font-size: 0.86rem;
+}

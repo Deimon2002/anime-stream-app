@@ -1,0 +1,289 @@
+<div class="watch-shell" [class.theater]="playerStore.isTheaterMode()">
+  @if (playerStore.currentAnime(); as anime) {
+    @if (playerStore.currentEpisode(); as ep) {
+      <div class="watch-layout">
+        <section class="player-column">
+          <div class="breadcrumb-bar">
+            <a [routerLink]="['/anime', anime.id]" class="back-link">
+              ← {{ anime.title }}
+            </a>
+            <div class="top-toggles">
+              <button
+                type="button"
+                class="btn btn-ghost mini-btn"
+                (click)="showSourcePanel.set(!showSourcePanel())"
+              >
+                Fuente MP4/WebM
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost mini-btn"
+                (click)="playerStore.toggleAutoplayNext()"
+              >
+                Autoplay: {{ playerStore.autoplayNext() ? 'ON' : 'OFF' }}
+              </button>
+            </div>
+          </div>
+
+          @if (showSourcePanel()) {
+            <div class="source-panel">
+              <input
+                type="url"
+                placeholder="Pega una URL .mp4 o .webm (o déjalo vacío para stream animado local)"
+                [value]="customUrlDraft()"
+                (input)="customUrlDraft.set($any($event.target).value)"
+              />
+              <button type="button" class="btn btn-primary mini-btn" (click)="applyCustomVideoUrl()">
+                Cargar
+              </button>
+              <button type="button" class="btn btn-ghost mini-btn" (click)="clearCustomVideoUrl()">
+                Usar stream local
+              </button>
+            </div>
+          }
+
+          <div class="player-stage" #playerStage>
+            @if (playerStore.customVideoUrl(); as videoUrl) {
+              <video
+                #nativeVideo
+                class="stage-media"
+                [src]="videoUrl"
+                (click)="togglePlay()"
+                (timeupdate)="onVideoTimeUpdate()"
+                (ended)="onVideoEnded()"
+                (play)="playerStore.setPlaying(true)"
+                (pause)="playerStore.setPlaying(false)"
+              ></video>
+            } @else {
+              <canvas
+                #streamCanvas
+                class="stage-media"
+                width="960"
+                height="540"
+                (click)="togglePlay()"
+              ></canvas>
+            }
+
+            @if (!playerStore.isPlaying()) {
+              <button
+                type="button"
+                class="center-play-btn"
+                (click)="togglePlay()"
+                aria-label="Reproducir episodio"
+              >
+                ▶
+              </button>
+            }
+
+            @if (playerStore.activeSubtitleText(); as subText) {
+              <div class="subtitle-box" aria-live="polite">
+                <span>{{ subText }}</span>
+              </div>
+            }
+
+            @if (playerStore.canSkipIntro()) {
+              <button type="button" class="skip-intro-btn" (click)="skipIntro()">
+                Saltar Intro ⏭
+              </button>
+            }
+
+            @if (playerStore.showUpNextBanner() && playerStore.nextEpisode(); as nextEp) {
+              <div class="up-next-card">
+                <div>
+                  <small>Siguiente episodio</small>
+                  <strong>Ep. {{ nextEp.number }}: {{ nextEp.title }}</strong>
+                </div>
+                <div class="up-next-actions">
+                  <button type="button" class="btn btn-primary mini-btn" (click)="playEpisode(nextEp.id)">
+                    Ver ahora
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost mini-btn"
+                    (click)="playerStore.dismissUpNext()"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            }
+
+            <div class="controls-bar">
+              <input
+                type="range"
+                class="seek-slider"
+                min="0"
+                max="100"
+                step="0.2"
+                aria-label="Progreso del episodio"
+                [value]="playerStore.progressPercent()"
+                (input)="seekToPercent($event)"
+              />
+
+              <div class="controls-row">
+                <div class="controls-left">
+                  <button type="button" class="icon-btn" (click)="togglePlay()">
+                    {{ playerStore.isPlaying() ? '❚❚' : '▶' }}
+                  </button>
+                  <button type="button" class="icon-btn" (click)="seekRelative(-10)" title="-10s (J)">
+                    ↺10
+                  </button>
+                  <button type="button" class="icon-btn" (click)="seekRelative(10)" title="+10s (L)">
+                    10↻
+                  </button>
+
+                  <button type="button" class="icon-btn" (click)="playerStore.toggleMute()" title="Silenciar (M)">
+                    {{ playerStore.isMuted() ? '🔇' : '🔊' }}
+                  </button>
+                  <input
+                    type="range"
+                    class="volume-slider"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    aria-label="Volumen"
+                    [value]="playerStore.isMuted() ? 0 : playerStore.volume()"
+                    (input)="onVolumeChange($event)"
+                  />
+
+                  <span class="time-readout">
+                    {{ playerStore.formattedCurrentTime() }} / {{ playerStore.formattedDuration() }}
+                  </span>
+                </div>
+
+                <div class="controls-right">
+                  <select aria-label="Velocidad" [value]="playerStore.playbackRate()" (change)="onRateChange($event)">
+                    <option value="0.75">0.75x</option>
+                    <option value="1">1x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2x</option>
+                  </select>
+
+                  <select aria-label="Audio" [value]="playerStore.selectedAudio()" (change)="onAudioChange($event)">
+                    <option value="jp">Audio: JP</option>
+                    <option value="es">Audio: ES</option>
+                    <option value="en">Audio: EN</option>
+                  </select>
+
+                  <select aria-label="Subtítulos" [value]="playerStore.selectedSubtitle()" (change)="onSubtitleChange($event)">
+                    <option value="es">Sub: ES</option>
+                    <option value="en">Sub: EN</option>
+                    <option value="off">Sub: OFF</option>
+                  </select>
+
+                  <select aria-label="Calidad" [value]="playerStore.selectedQuality()" (change)="onQualityChange($event)">
+                    <option value="1080p">1080p</option>
+                    <option value="720p">720p</option>
+                    <option value="480p">480p</option>
+                  </select>
+
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    (click)="playerStore.toggleTheaterMode()"
+                    title="Modo teatro (T)"
+                  >
+                    ▭
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    (click)="toggleFullscreen()"
+                    title="Pantalla completa (F)"
+                  >
+                    ⛶
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="episode-meta-card">
+            <div>
+              <span class="badge">{{ anime.studio }} • {{ anime.year }}</span>
+              <h1>Ep. {{ ep.number }} — {{ ep.title }}</h1>
+              <p class="muted">{{ ep.synopsis }}</p>
+            </div>
+
+            <div class="ep-nav-buttons">
+              @if (playerStore.prevEpisode(); as prev) {
+                <button type="button" class="btn btn-ghost" (click)="playEpisode(prev.id)">
+                  ← Ep. {{ prev.number }}
+                </button>
+              }
+              @if (playerStore.nextEpisode(); as next) {
+                <button type="button" class="btn btn-primary" (click)="playEpisode(next.id)">
+                  Ep. {{ next.number }} →
+                </button>
+              }
+            </div>
+          </div>
+        </section>
+
+        <aside class="playlist-sidebar">
+          <div class="sidebar-tabs">
+            <button
+              type="button"
+              [class.active]="playerStore.activeSidebarTab() === 'episodes'"
+              (click)="playerStore.activeSidebarTab.set('episodes')"
+            >
+              Episodios ({{ anime.episodes.length }})
+            </button>
+            <button
+              type="button"
+              [class.active]="playerStore.activeSidebarTab() === 'details'"
+              (click)="playerStore.activeSidebarTab.set('details')"
+            >
+              Serie
+            </button>
+          </div>
+
+          @if (playerStore.activeSidebarTab() === 'episodes') {
+            <div class="sidebar-list">
+              @for (item of anime.episodes; track item.id) {
+                <button
+                  type="button"
+                  class="sidebar-ep"
+                  [class.current]="item.id === ep.id"
+                  (click)="playEpisode(item.id)"
+                >
+                  <span class="ep-idx">{{ item.number }}</span>
+                  <span class="ep-text">
+                    <strong>{{ item.title }}</strong>
+                    <small>{{ formatDuration(item.durationSec) }}</small>
+                    @if (episodeProgressPercent(item.id) > 0) {
+                      <span class="mini-bar">
+                        <span [style.width.%]="episodeProgressPercent(item.id)"></span>
+                      </span>
+                    }
+                  </span>
+                </button>
+              }
+            </div>
+          } @else {
+            <div class="sidebar-details">
+              <img [src]="anime.posterUrl" [alt]="anime.title" />
+              <h3>{{ anime.title }}</h3>
+              <p class="muted">{{ anime.synopsis }}</p>
+              <div class="shortcuts-box">
+                <strong>Atajos de teclado</strong>
+                <p>Espacio / K: Play/Pausa • J / L: ±10s • M: Mute • T: Teatro • F: Pantalla completa</p>
+              </div>
+            </div>
+          }
+        </aside>
+      </div>
+    } @else {
+      <div class="page-shell">
+        <h2>Episodio no encontrado</h2>
+        <a class="btn btn-primary" [routerLink]="['/anime', anime.id]">Volver a la serie</a>
+      </div>
+    }
+  } @else {
+    <div class="page-shell">
+      <h2>Anime no encontrado</h2>
+      <a class="btn btn-primary" routerLink="/">Volver al catálogo</a>
+    </div>
+  }
+</div>

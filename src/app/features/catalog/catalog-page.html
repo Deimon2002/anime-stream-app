@@ -1,0 +1,114 @@
+<div class="page-shell">
+  <section class="hero" [style.--hero-accent]="featured().accentColor">
+    <img class="hero-bg" [src]="featured().bannerUrl" [alt]="featured().title" />
+    <div class="hero-scrim"></div>
+
+    <div class="hero-content">
+      <div class="hero-badges">
+        <span class="badge badge-live">{{ featured().status }}</span>
+        <span class="badge">★ {{ featured().rating.toFixed(1) }}</span>
+        <span class="badge">{{ featured().year }} • {{ featured().studio }}</span>
+      </div>
+
+      <p class="hero-jp">{{ featured().japaneseTitle }}</p>
+      <h1>{{ featured().title }}</h1>
+      <p class="hero-synopsis">{{ featured().synopsis }}</p>
+
+      <div class="hero-actions">
+        <a
+          class="btn btn-primary"
+          [routerLink]="['/watch', featured().id, featured().episodes[0].id]"
+        >
+          ▶ Reproducir Ep. 1
+        </a>
+        <a class="btn btn-ghost" [routerLink]="['/anime', featured().id]">
+          Detalles y episodios
+        </a>
+        <button type="button" class="btn btn-ghost" (click)="toggleFeaturedWatchlist()">
+          {{ featuredInWatchlist() ? '✓ En Mi Lista' : '+ Mi Lista' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  @if (continueWatching().length > 0) {
+    <section class="block">
+      <div class="section-header">
+        <h2 class="section-title">Continuar viendo</h2>
+        <span class="muted">{{ continueWatching().length }} en progreso</span>
+      </div>
+
+      <div class="continue-grid">
+        @for (item of continueWatching().slice(0, 4); track item.episode.id) {
+          <a
+            class="continue-card"
+            [routerLink]="['/watch', item.anime.id, item.episode.id]"
+          >
+            <img [src]="item.anime.posterUrl" [alt]="item.anime.title" />
+            <div class="continue-info">
+              <span class="continue-anime">{{ item.anime.title }}</span>
+              <strong>Ep. {{ item.episode.number }}: {{ item.episode.title }}</strong>
+              <div class="progress-track">
+                <div class="progress-fill" [style.width.%]="item.percent"></div>
+              </div>
+              <span class="continue-pct">
+                {{ item.progress.completed ? 'Completado' : item.percent + '% visto' }}
+              </span>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+  }
+
+  <section class="block">
+    <div class="section-header catalog-header">
+      <div>
+        <h2 class="section-title">Explorar catálogo</h2>
+        <p class="muted subtitle">
+          {{ filteredAnime().length }} series disponibles con renderizado reactivo Zoneless
+        </p>
+      </div>
+
+      <label class="sort-select">
+        <span class="muted">Ordenar:</span>
+        <select [value]="sortBy()" (change)="onSortChange($event)">
+          <option value="rating">Mejor valorados</option>
+          <option value="year">Más recientes</option>
+          <option value="title">Título (A–Z)</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="genre-bar" role="tablist" aria-label="Filtrar por género">
+      @for (genre of genres(); track genre) {
+        <button
+          type="button"
+          class="genre-chip"
+          [class.active]="selectedGenre() === genre"
+          (click)="selectGenre(genre)"
+        >
+          {{ genre }}
+        </button>
+      }
+    </div>
+
+    @if (filteredAnime().length > 0) {
+      <div class="anime-grid">
+        @for (anime of filteredAnime(); track anime.id) {
+          <app-anime-card [anime]="anime" />
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <h3>No encontramos coincidencias</h3>
+        <p class="muted">
+          No hay resultados para "{{ searchQuery() }}" en el género {{ selectedGenre() }}.
+        </p>
+        <button type="button" class="btn btn-primary" (click)="resetFilters()">
+          Restablecer filtros
+        </button>
+      </div>
+    }
+  </section>
+</div>

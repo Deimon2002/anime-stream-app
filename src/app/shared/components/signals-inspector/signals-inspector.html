@@ -1,0 +1,70 @@
+<aside class="inspector-drawer" aria-label="Inspector de Signals y Zoneless">
+  <div class="inspector-head">
+    <div>
+      <span class="hud-kicker">ARQUITECTURA EN VIVO</span>
+      <h3>Zoneless + Signals HUD</h3>
+    </div>
+    <button type="button" class="close-btn" (click)="closePanel.emit()" aria-label="Cerrar">
+      ✕
+    </button>
+  </div>
+
+  <div class="hud-grid">
+    <div class="hud-item">
+      <span class="hud-label">Zone.js</span>
+      <strong class="hud-value" [class.ok]="!hasZoneJs">
+        {{ hasZoneJs ? 'Presente' : 'Desactivado (Zoneless)' }}
+      </strong>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">ChangeDetection</span>
+      <strong class="hud-value ok">OnPush + Signals</strong>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">Catálogo filtrado</span>
+      <strong class="hud-value">{{ filteredCount() }} / {{ stats().totalAnime }}</strong>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">Filtro activo</span>
+      <strong class="hud-value">{{ selectedGenre() }}</strong>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">Búsqueda signal()</span>
+      <strong class="hud-value">{{ searchQuery() || '""' }}</strong>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">Episodios vistos</span>
+      <strong class="hud-value">{{ stats().watchedEpisodesCount }}</strong>
+    </div>
+  </div>
+
+  <div class="hud-divider"></div>
+
+  <div class="hud-player">
+    <span class="hud-kicker">PLAYER STORE SIGNALS</span>
+    <div class="hud-row">
+      <span>Serie</span>
+      <code>{{ currentAnime()?.title ?? 'Ninguna' }}</code>
+    </div>
+    <div class="hud-row">
+      <span>Episodio</span>
+      <code>{{ currentEpisode()?.title ?? '—' }}</code>
+    </div>
+    <div class="hud-row">
+      <span>isPlaying()</span>
+      <code>{{ isPlaying() }}</code>
+    </div>
+    <div class="hud-row">
+      <span>time / duration</span>
+      <code>{{ formattedCurrentTime() }} / {{ formattedDuration() }} ({{ progressPercent().toFixed(1) }}%)</code>
+    </div>
+    <div class="hud-row">
+      <span>canSkipIntro()</span>
+      <code>{{ canSkipIntro() }}</code>
+    </div>
+    <div class="hud-row">
+      <span>rate / subs</span>
+      <code>{{ playbackRate() }}x • {{ selectedSubtitle() }}</code>
+    </div>
+  </div>
+</aside>

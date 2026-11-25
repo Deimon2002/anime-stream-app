@@ -1,0 +1,59 @@
+<header class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" routerLink="/">
+      <span class="brand-mark" aria-hidden="true">狐</span>
+      <span class="brand-text">
+        <strong>KitsunePlay</strong>
+        <small>Zoneless • Signals</small>
+      </span>
+    </a>
+
+    <nav class="nav-links" aria-label="Navegación principal">
+      <a
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-link"
+      >
+        Catálogo
+      </a>
+      <a routerLink="/mi-lista" routerLinkActive="active" class="nav-link">
+        Mi Lista
+        <span class="nav-pill">{{ stats().watchlistCount }}</span>
+      </a>
+      @if (currentAnime() && currentEpisode()) {
+        <a
+          [routerLink]="['/watch', currentAnime()!.id, currentEpisode()!.id]"
+          routerLinkActive="active"
+          class="nav-link nav-live"
+        >
+          <span class="pulse-dot" [class.paused]="!isPlaying()"></span>
+          Reproduciendo
+        </a>
+      }
+    </nav>
+
+    <div class="nav-actions">
+      <label class="search-box">
+        <span class="sr-only">Buscar anime</span>
+        <input
+          type="search"
+          placeholder="Buscar anime, estudio o género..."
+          [value]="searchQuery()"
+          (input)="onSearchInput($event)"
+        />
+      </label>
+
+      <button
+        type="button"
+        class="btn btn-ghost inspector-btn"
+        [class.active]="inspectorOpen()"
+        (click)="toggleInspector.emit()"
+        title="Inspeccionar Signals y estado Zoneless en tiempo real"
+      >
+        <span class="badge-dot"></span>
+        Signals HUD
+      </button>
+    </div>
+  </div>
+</header>
